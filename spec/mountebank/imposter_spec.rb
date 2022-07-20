@@ -17,7 +17,6 @@ RSpec.describe Mountebank::Imposter do
       expect(imposter.stubs).to be_empty
       expect(imposter.requests).to be_empty
       expect(imposter.mode).to be_nil
-      expect(imposter.record_requests).to be_falsey
     end
   end
 
@@ -77,7 +76,7 @@ RSpec.describe Mountebank::Imposter do
           Mountebank::Stub.create(responses, predicates)
         ]
       }
-      let!(:imposter) { Mountebank::Imposter.create(port, protocol, stubs:stubs) }
+      let!(:imposter) { Mountebank::Imposter.create(port, protocol, { stubs:stubs, record_requests: true }) }
 
       it 'is valid' do
         expect(test_url('http://127.0.0.1:4545')).to eq 'ohai'
@@ -142,7 +141,7 @@ RSpec.describe Mountebank::Imposter do
 
   describe '#reload' do
     before do
-      Mountebank::Imposter.create(port)
+      Mountebank::Imposter.create(port, protocol, record_requests: true)
     end
 
     let!(:imposter) { Mountebank::Imposter.find(port) }
@@ -157,6 +156,7 @@ RSpec.describe Mountebank::Imposter do
     end
 
     context 'has requests' do
+
       it 'returns imposter with requests' do
         test_url('http://127.0.0.1:4545')
         expect(imposter.reload.requests).to_not be_empty
